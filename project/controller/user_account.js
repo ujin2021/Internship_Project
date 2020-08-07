@@ -1,18 +1,19 @@
 const express = require('express');
-const mysql = require('mysql');
-
 const router = express.Router();
 
+const mysql = require('mysql');
 const dbconfig = require('../config/settings.js').database;
-var conn = mysql.createConnection(dbconfig); //end?
+var conn = mysql.createConnection(dbconfig);
 
 const key = require('../config/settings.js').secretKey;
 const crypto = require('crypto');
+const { timeStamp, time } = require('console');
 
-function emailCheckAPI (req, res){
+emailCheckAPI = (req, res) => {
     console.log(req.body);
     let check_sql = 'SELECT * FROM user WHERE email=?'; // 중복검사 위한 sql
     let params = [req.body['email']];
+    conn.connect();
     conn.query(check_sql, params, function(err, result){
         if(err) console.log(err);
         else{
@@ -27,66 +28,93 @@ function emailCheckAPI (req, res){
             res.status(status).json(msg);
         }
     });
+    conn.end();
 }
 
-function getUserAPI (req, res){
+getUserAPI = (req, res) => {
+    conn.connect();
     conn.query('SELECT * FROM user', function(err, result){
         if(err) console.log(err);
         console.log(result[0]);
         let html = `<p>${result[0].email}</p>`; 
         res.send(html);
     });
+    conn.end();
 }
 
-function signupAPI (req, res){
+signupAPI = (req, res) => {
     console.log(req.body);
     let email = req.body['email'];
     let pw = req.body['password'];
     let nickname = req.body['nickname'];
     let phone_num = req.body['phone_num']
 
-    const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // hiddenkey 대신 진짜 key 넣어줘야함, 암호화 방식 바꿔주기
+    const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기(같은 pw면 같에 암호화 된다.)
     let password = cipher.update(pw, 'utf8','base64');
     password += cipher.final('base64');
-    console.log(password);
+    console.log('ciphered pw : ', password);
 
     let sql = 'INSERT INTO user(email, password, nickname, phone_num) VALUES(?, ?, ?, ?);'
     let params = [email, password, nickname, phone_num];
+    conn.connect();
     conn.query(sql, params, function(err, rows, fields){
-        if(err) console.log(err);
-        else{console.log('save data');}
-    });
-    res.status(201).json('Signup success');
+        if(err) {
+            console.log(err);
+            res.status(503).json('Signup Fail');
+        } // 덜 채워서 줬을 때, 사용자에게는 성공메세지가 감 --> 수정하기
+        else{
+            console.log('Save user');
+            res.status(201).json('Signup success');
+        }
+    });  
+    conn.end(); 
 }
 
-function loginAPI (req, res){
-    // console.log(req.body);
+async function loginAPI (req, res){
     let email = req.body['email'];
     let pw = req.body['password'];
     let db_pw = '';
 
-    // 위의 email check 와 중복됨
+    // 위의 email check 와 중복됨 -> 해결하기
     let sql = 'SELECT password FROM user WHERE email=?';
     params = [email];
-    conn.query(sql, params, function(err, result){
+    conn.connect();
+    conn.query(sql, params, async function(err, result){ // 복호화 부분을 conn 밖으로 빼기
         if(err) console.log(err);
         else{
             if(result.length === 0) res.status(503).json('Not my user');
             else {
                 db_pw = result[0].password;
                 console.log('db_pw:', db_pw);
-                const decipher = crypto.createDecipher('aes-256-cbc', key.secretKey) // hiddenkey 대신 진짜 key 넣어줘야함, 암호화 방식 바꿔주기
-                db_pw = decipher.update(db_pw, 'base64', 'utf8');
-                db_pw += decipher.final('utf8');
+                // 복호화
+                const decipher = await crypto.createDecipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기
+                db_pw = await decipher.update(db_pw, 'base64', 'utf8');
+                db_pw += await decipher.final('utf8');
 
                 if(db_pw === pw){
                     console.log('login success');
-                    res.status(201).json('Login success')
+                    await res.status(201).json('Login success')
                 }
             }
         }
     });
+    conn.end(); 
 }
+/*
+function database (sql, params){
+    conn.connect();
+    conn.query(sql, params, function(err, result){
+        if(err){
+            console.log(err);
+            res.status(503).json('error');
+        }
+        else
+    });
+}
+https://bangc.tistory.com/15
+db도 미들웨어(모듈) 로 만들어서 분리시키기(최대한 중복줄이기)
+
+*/
 
 module.exports = {
     emailCheckAPI : emailCheckAPI,
