@@ -3,7 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=database,windows,git,node
 
 # my
-database.js
+config/
 
 ### Database ###
 *.accdb
