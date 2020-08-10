@@ -1,10 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-const mysql = require('mysql');
-const dbconfig = require('../config/settings.js').database;
-var conn = mysql.createConnection(dbconfig);
-
 const key = require('../config/settings.js').secretKey;
 const crypto = require('crypto');
 

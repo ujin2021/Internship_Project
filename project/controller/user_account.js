@@ -1,19 +1,18 @@
 const express = require('express');
 const router = express.Router();
 
-const mysql = require('mysql');
-const dbconfig = require('../config/settings.js').database;
-var conn = mysql.createConnection(dbconfig);
+let conn = require('../config/db_settings.js');
+conn.connect();
 
-const key = require('../config/settings.js').secretKey;
+const key = require('../config/settings.js');
 const crypto = require('crypto');
-const { timeStamp, time } = require('console');
+//const { timeStamp, time } = require('console');
+
 
 emailCheckAPI = (req, res) => {
     console.log(req.body);
     let check_sql = 'SELECT * FROM user WHERE email=?'; // 중복검사 위한 sql
     let params = [req.body['email']];
-    conn.connect();
     conn.query(check_sql, params, function(err, result){
         if(err) console.log(err);
         else{
@@ -28,18 +27,15 @@ emailCheckAPI = (req, res) => {
             res.status(status).json(msg);
         }
     });
-    conn.end();
 }
 
 getUserAPI = (req, res) => {
-    conn.connect();
     conn.query('SELECT * FROM user', function(err, result){
         if(err) console.log(err);
         console.log(result[0]);
         let html = `<p>${result[0].email}</p>`; 
         res.send(html);
     });
-    conn.end();
 }
 
 signupAPI = (req, res) => {
@@ -56,7 +52,6 @@ signupAPI = (req, res) => {
 
     let sql = 'INSERT INTO user(email, password, nickname, phone_num) VALUES(?, ?, ?, ?);'
     let params = [email, password, nickname, phone_num];
-    conn.connect();
     conn.query(sql, params, function(err, rows, fields){
         if(err) {
             console.log(err);
@@ -67,7 +62,6 @@ signupAPI = (req, res) => {
             res.status(201).json('Signup success');
         }
     });  
-    conn.end(); 
 }
 
 async function loginAPI (req, res){
@@ -78,7 +72,6 @@ async function loginAPI (req, res){
     // 위의 email check 와 중복됨 -> 해결하기
     let sql = 'SELECT password FROM user WHERE email=?';
     params = [email];
-    conn.connect();
     conn.query(sql, params, async function(err, result){ // 복호화 부분을 conn 밖으로 빼기
         if(err) console.log(err);
         else{
@@ -93,12 +86,15 @@ async function loginAPI (req, res){
 
                 if(db_pw === pw){
                     console.log('login success');
-                    await res.status(201).json('Login success')
+                    await res.status(201).json('Login success');
+                }
+                else{
+                    console.log('login failed');
+                    await res.status(503).json('Login failed');
                 }
             }
         }
     });
-    conn.end(); 
 }
 /*
 function database (sql, params){
@@ -113,7 +109,6 @@ function database (sql, params){
 }
 https://bangc.tistory.com/15
 db도 미들웨어(모듈) 로 만들어서 분리시키기(최대한 중복줄이기)
-
 */
 
 module.exports = {
