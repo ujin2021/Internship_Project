@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const key = require('../config/settings.js').secretKey;
-const crypto = require('crypto');
+// const key = require('../config/settings.js').secretKey;
+// const crypto = require('crypto');
 
 const UserController = require('../controller/user_account');
 

@@ -2,22 +2,22 @@ const express = require('express');
 const router = express.Router();
 
 let conn = require('../config/db_settings.js');
-conn.connect();
 
 const jwt = require('jsonwebtoken');
 
 const key = require('../config/settings.js').secretKey;
 const crypto = require('crypto');
-//const { timeStamp, time } = require('console');
+require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
+const { timeStamp, time } = require('console');
 
 async function createToken(id) {
-    const token = jwt.sign(
-        {user_id: id}, key.secretKey, {expiresIn : '3h'}
-    );
+    // 기본 알고리즘 : HMAC SHA256
+    // 알고리즘 변경 할 수 있다. https://github.com/auth0/node-jsonwebtoken#usage
+    const token = jwt.sign({user_id: id}, key.secretKey);
     return token;
 }
 
-emailCheckAPI = (req, res) => {
+exports.emailCheckAPI = (req, res) => {
     console.log(req.body);
     let sql = 'SELECT * FROM user WHERE email=?'; // 중복검사 위한 sql
     let params = [req.body['email']];
@@ -37,16 +37,22 @@ emailCheckAPI = (req, res) => {
     });
 }
 
-getUserAPI = (req, res) => {
+exports.getUserAPI = (req, res) => {
     conn.query('SELECT * FROM user', function(err, result){
         if(err) console.log(err);
         console.log(result[0]);
-        let html = `<p>${result[0].email}</p>`; 
+        let body = '';
+        for (let i = 0; i< result.length; i++) {
+            let info = '{id : ' + result[i].id + ', email : ' + result[i].email + '}';
+            body += info;
+        }
+        console.log('body : ', body);
+        let html = `${body}`;
         res.send(html);
     });
 }
 
-signupAPI = (req, res) => {
+exports.signupAPI = (req, res) => {
     console.log(req.body);
     let email = req.body['email'];
     let pw = req.body['password'];
@@ -71,6 +77,8 @@ signupAPI = (req, res) => {
         }
     });  
 }
+
+exports.loginAPI = loginAPI;
 
 async function loginAPI (req, res){
     let email = req.body['email'];
@@ -114,26 +122,12 @@ function database (sql, params){
             console.log(err);
             return(err);
         }
-        else{
-            if(sql.split()[0] === 'SELECT'){
-                if(result.length === 0){ // 찾았는데 아무것도 없다
-                    
-                }
-            }
-            else if(sql.split()[0] === 'INSERT'){
-
-            }
-        }
     });
 }
 
 https://bangc.tistory.com/15
-db도 미들웨어(모듈) 로 만들어서 분리시키기(최대한 중복줄이기)
+db도 미들웨어로 만들어서 분리시키기(최대한 중복줄이기)
 */
 
-module.exports = {
-    emailCheckAPI : emailCheckAPI,
-    getUserAPI : getUserAPI,
-    signupAPI : signupAPI,
-    loginAPI : loginAPI
-}
+// 하나씩 하지말고 한번에 하도록 수정하기
+module.exports = exports
