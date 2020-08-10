@@ -4,16 +4,24 @@ const router = express.Router();
 let conn = require('../config/db_settings.js');
 conn.connect();
 
-const key = require('../config/settings.js');
+const jwt = require('jsonwebtoken');
+
+const key = require('../config/settings.js').secretKey;
 const crypto = require('crypto');
 //const { timeStamp, time } = require('console');
 
+async function createToken(id) {
+    const token = jwt.sign(
+        {user_id: id}, key.secretKey, {expiresIn : '3h'}
+    );
+    return token;
+}
 
 emailCheckAPI = (req, res) => {
     console.log(req.body);
-    let check_sql = 'SELECT * FROM user WHERE email=?'; // 중복검사 위한 sql
+    let sql = 'SELECT * FROM user WHERE email=?'; // 중복검사 위한 sql
     let params = [req.body['email']];
-    conn.query(check_sql, params, function(err, result){
+    conn.query(sql, params, function(err, result){
         if(err) console.log(err);
         else{
             if(result.length === 0){
@@ -70,7 +78,7 @@ async function loginAPI (req, res){
     let db_pw = '';
 
     // 위의 email check 와 중복됨 -> 해결하기
-    let sql = 'SELECT password FROM user WHERE email=?';
+    let sql = 'SELECT id, password FROM user WHERE email=?';
     params = [email];
     conn.query(sql, params, async function(err, result){ // 복호화 부분을 conn 밖으로 빼기
         if(err) console.log(err);
@@ -86,7 +94,8 @@ async function loginAPI (req, res){
 
                 if(db_pw === pw){
                     console.log('login success');
-                    await res.status(201).json('Login success');
+                    let token = await createToken(result[0].id);
+                    await res.status(201).json(token);
                 }
                 else{
                     console.log('login failed');
@@ -96,17 +105,28 @@ async function loginAPI (req, res){
         }
     });
 }
+
+
 /*
 function database (sql, params){
-    conn.connect();
     conn.query(sql, params, function(err, result){
         if(err){
             console.log(err);
-            res.status(503).json('error');
+            return(err);
         }
-        else
+        else{
+            if(sql.split()[0] === 'SELECT'){
+                if(result.length === 0){ // 찾았는데 아무것도 없다
+                    
+                }
+            }
+            else if(sql.split()[0] === 'INSERT'){
+
+            }
+        }
     });
 }
+
 https://bangc.tistory.com/15
 db도 미들웨어(모듈) 로 만들어서 분리시키기(최대한 중복줄이기)
 */
