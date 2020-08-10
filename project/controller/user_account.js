@@ -47,8 +47,7 @@ exports.getUserAPI = (req, res) => {
             body += info;
         }
         console.log('body : ', body);
-        let html = `${body}`;
-        res.send(html);
+        res.send(body);
     });
 }
 
