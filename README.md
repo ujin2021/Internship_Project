@@ -8,3 +8,6 @@ node.js(express.js) + mysql <br>
 * npm install body-parser
 * npm install express mysql
 * npm install --save request
+* npm install crypto --save
+* npm install jsonwebtoken
+* npm install console-stamp --save
