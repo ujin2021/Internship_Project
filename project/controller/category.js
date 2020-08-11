@@ -4,57 +4,44 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const key = require('../config/settings.js').secretKey;
 
-// crawling
-const axios = require('axios');
-const cheerio = require('cheerio');
+const tokenCheck = require('./tokenCheck').tokenCheck;
 
-let conn = require('../config/db_settings.js');
-const { param } = require('../routes/index.js');
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
-exports.listAPI = (req, res) => {
-    // 카테고리 목록을 보여준다.
-    conn.query('SELECT * FROM category', function(err, result){
-        if(err) console.log(err);
-        console.log(result);
-        let body = '';
-        for (let i = 0; i< result.length; i++) {
-            let name = result[i].name;
-            body += name;
+exports.listAPI = async (req, res) => {
+    try{
+        const result = await res.pool.query(`SELECT * FROM category`)
+        if(result.length > 0){
+            res.status(200).json(result[0])
+        } else {
+            res.status(204).json(`카테고리가 없습니다.`)
         }
-        // console.log('body : ', body);
-        // let html = `${body}`;
-        res.send(body);
-    });
-}
-
-exports.selectAPI = (req, res) => {
-   // 선택한 카테고리에 해당하는 상품을 보내준다.
-   let token = req.get('Authorization'); // header 값 받아오기
-   console.log('token : ', token);
-
-   let decoded = jwt.verify(token, key.secretKey);
-   if(decoded){
-       console.log('token check ok');
-       sql = 'SELECT * FROM product where category=?';
-       param = [''];
-       conn.query(sql, param,function(err, result){
-           if(err){console.log(err);}
-           console.log(result);
-            let body = '';
-            for (let i = 0; i< result.length; i++) {
-            let list = result[i].name;
-            body += list;
-            }
-            console.log('body : ', body);
-            res.send(body);
-        })
+    } catch (e) {
+        console.error(e)
+        res.status(503).json(e)
     }
-   else{
-       console.log('need token');
-       res.status(503).json('Need token');
-   }
 }
 
+
+exports.selectCategory = async (req, res) => {
+    try{
+        const category = req.body['name']
+        let sql = `SELECT id FROM category WHERE name = ?;`
+        let result = await res.pool.query(sql, [category])
+
+        sql = `SELECT * FROM product WHERE id = ?;`
+        result = await res.pool.query(sql, [result[0][0].id])
+
+        if(result.length === 0){
+            res.status(204).json(`해당 카테고리에 상품이 없습니다.`)
+        } else {
+            res.status(200).json(result[0])
+        }
+    } catch (e) {
+        console.error(e)
+        res.status(503).json(e)
+    }
+    
+ }
 
 module.exports = exports
