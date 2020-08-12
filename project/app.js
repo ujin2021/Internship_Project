@@ -8,7 +8,6 @@ app.use(express.json()); // bodyParser 사용 설정
 const indexRouter = require('./routes/index.js');
 const userRouter = require('./routes/user_account.js'); // email_check, signup, login
 const categoryRouter = require('./routes/category.js');
-
 app.use(database.sql.pool('pool', {
     host : dbConfig.host,
     port : dbConfig.port,
