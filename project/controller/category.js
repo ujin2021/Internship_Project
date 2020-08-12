@@ -31,8 +31,8 @@ exports.selectCategory = async (req, res) => {
 
         sql = `SELECT * FROM product WHERE id = ?;`
         result = await res.pool.query(sql, [result[0][0].id])
-
-        if(result.length === 0){
+		console.log('result : ', result[0].length)
+        if(result[0].length === 0){
             res.status(204).json(`해당 카테고리에 상품이 없습니다.`)
         } else {
             res.status(200).json(result[0])

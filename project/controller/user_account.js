@@ -20,7 +20,7 @@ exports.emailCheckAPI = async (req, res) => {
     try {
         const params = [req.body['email']]
         const result = await res.pool.query(`SELECT * FROM user WHERE email = ?`, params)
-        if (result.length === 0) {
+		if (result[0].length === 0) {
             res.status(200).json(`가입 가능한 이메일 주소 입니다.`)
         } else {
             res.status(400).json(`이미 가입된 이메일 주소 입니다.`)
