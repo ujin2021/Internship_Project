@@ -7,6 +7,11 @@ axios.get(`http://store.naver.com/sogum/api/businesses?start=1&display=20&query=
         const $ = cheerio.load(data.data);
         console.log('$:',$)
     })
+    .then((response)=>{
+        console.log('response : ', response)
+    }).catch((err)=>{
+        console.error(err)
+    })
 
 /*
 axios({

@@ -15,15 +15,13 @@ async function createToken(id) {
 }
 
 exports.emailCheckAPI = async (req, res) => { 
-    let status = null
-    let message = ``
     try {
         const params = [req.body['email']]
-        const result = await res.pool.query(`SELECT * FROM user WHERE email = ?`, params)
+        const result = await res.pool.query(`SELECT * FROM USER WHERE email = ?`, params)
 		if (result[0].length === 0) {
-            res.status(200).json(`가입 가능한 이메일 주소 입니다.`)
+            res.status(200).json({'status' : 200, 'msg' : `가입 가능한 이메일 주소 입니다.`})
         } else {
-            res.status(400).json(`이미 가입된 이메일 주소 입니다.`)
+            res.status(400).json({'status' : 400, 'msg' : `이미 가입된 이메일 주소 입니다.`})
         }
     } catch (e) {
         console.error(e)
@@ -33,11 +31,11 @@ exports.emailCheckAPI = async (req, res) => {
 
 exports.getUserAPI = async (req, res) => {
     try{
-        const result = await res.pool.query(`SELECT * FROM user`)
+        const result = await res.pool.query(`SELECT * FROM USER`)
         if(result.length > 0){
             res.status(200).json(result[0])
         } else {
-            res.status(204).json(`가입한 회원이 없습니다.`)
+            res.status(204).json(`가입한 회원이 없습니다.`) // 204면 아무것도 안보내진다
         }
     } catch (e) {
         console.error(e)
@@ -50,16 +48,16 @@ exports.signupAPI = async (req, res) => {
         const email = req.body['email']
         const pw = req.body['password']
         const nickname = req.body['nickname']
-        const phone_num = req.body['phone_num']
+        const phone = req.body['phone']
 
         const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기(같은 pw면 같에 암호화 된다.)
         let password = cipher.update(pw, 'utf8','base64');
         password += cipher.final('base64');
 
-        const sql = `INSERT INTO user(email, password, nickname, phone_num) VALUES (?, ?, ?, ?);`
-        const params = [email, password, nickname, phone_num]
+        const sql = `INSERT INTO USER (email, password, nickname, phone) VALUES (?, ?, ?, ?);`
+        const params = [email, password, nickname, phone]
         const result = await res.pool.query(sql, params)
-        res.status(200).json(`회원가입에 성공했습니다.`)
+        res.status(200).json({'status' : 200, 'msg' : `회원가입에 성공했습니다.`})
     } catch (e) {
         console.error(e)
         res.status(503).json(e)
@@ -71,7 +69,8 @@ exports.loginAPI =  async(req, res) => {
         const email = req.body['email']
         const pw = req.body['password']
 
-        const result = await res.pool.query(`SELECT password FROM user WHERE email = ?`, [email])
+        const result = await res.pool.query(`SELECT * FROM USER WHERE email = ?`, [email])
+
         let db_pw = result[0][0].password
 
         const decipher = await crypto.createDecipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기
@@ -79,13 +78,16 @@ exports.loginAPI =  async(req, res) => {
         db_pw += await decipher.final('utf8');
 
         if (pw === db_pw){
-            let token = await createToken(result[0].id);
-            await res.status(200).json(token);
+            let token = await createToken(result[0][0].id);
+            await res.status(200).json({'status' : 200, 'token' : token});
         } else {
-            res.status(401).json(`비밀번호가 일치하지 않습니다.`)
+            res.status(400).json({'status' : 400, 'msg' : `비밀번호가 일치하지 않습니다.`})
         }
-    } catch (e) {
+    }catch (e) {
         console.error(e)
+        if (e instanceof TypeError){
+            await res.status(200).json({'status' : 204, 'msg' : `존재하지 않는 계정입니다.`});
+        }
         await res.status(503).json(e)
     }
 }

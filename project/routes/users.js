@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const UserController = require('../controller/user_account');
+const UserController = require('../controller/users');
 
 // app.js 경로 뒤에 붙여지는 주소
 router.post('/email_check', UserController.emailCheckAPI);
