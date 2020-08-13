@@ -22,13 +22,13 @@ node.js(express.js) + mysql <br>
 ✅ signup (password 암호화, 복호화) <br>
 ✅ login (token 발급, 체크) <br>
 ✅ Home 화면) categoryList 보내주기 (토큰 필요x) <br>
-✅ product crawling
+✅ product crawling (python code, 저장은 aws db)
 > 💭 cron tab 설정 
 
 ✅ category 선택 시) productList 보내주기 (토큰 필요x) <br>
 > (product 정보 입력받기)
 
-⬜️ 리뷰 <br>
-⬜️ 좋아요 <br>
+✅ 리뷰 - 리뷰list는 토큰 없이도 가능. 리뷰작성은 토큰 필요(만약 안보내주면 로그인 필요하다는 msg) <br>
+✅ 좋아요(찜하기) - db에 없으면 좋아요 등록, db에 있으면 좋아요 삭제 <br>
 ⬜️ 쿠폰 <br>
 ⬜️ 조회수 <br>
