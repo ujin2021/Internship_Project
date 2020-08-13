@@ -7,17 +7,17 @@ const key = require('../config/settings.js').secretKey;
 const crypto = require('crypto');
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
-async function createToken(id) {
+async function createToken(user_no) {
     // 기본 알고리즘 : HMAC SHA256
     // 알고리즘 변경 할 수 있다. https://github.com/auth0/node-jsonwebtoken#usage
-    const token = jwt.sign({user_id: id}, key.secretKey);
+    const token = jwt.sign({user_no: user_no}, key.secretKey);
     return token;
 }
 
 exports.emailCheckAPI = async (req, res) => { 
     try {
         const params = [req.body['email']]
-        const result = await res.pool.query(`SELECT * FROM USER WHERE email = ?`, params)
+        const result = await res.pool.query(`SELECT * FROM USERS WHERE  user_email = ?`, params)
 		if (result[0].length === 0) {
             res.status(200).json({'status' : 200, 'msg' : `가입 가능한 이메일 주소 입니다.`})
         } else {
@@ -31,7 +31,7 @@ exports.emailCheckAPI = async (req, res) => {
 
 exports.getUserAPI = async (req, res) => {
     try{
-        const result = await res.pool.query(`SELECT * FROM USER`)
+        const result = await res.pool.query(`SELECT * FROM USERS`)
         if(result.length > 0){
             res.status(200).json(result[0])
         } else {
@@ -45,17 +45,17 @@ exports.getUserAPI = async (req, res) => {
 
 exports.signupAPI = async (req, res) => {
     try{
-        const email = req.body['email']
-        const pw = req.body['password']
-        const nickname = req.body['nickname']
-        const phone = req.body['phone']
+        const user_email = req.body['user_email']
+        const user_password = req.body['user_password']
+        const user_nickname = req.body['user_nickname']
+        const user_phone = req.body['user_phone']
 
         const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기(같은 pw면 같에 암호화 된다.)
         let password = cipher.update(pw, 'utf8','base64');
         password += cipher.final('base64');
 
-        const sql = `INSERT INTO USER (email, password, nickname, phone) VALUES (?, ?, ?, ?);`
-        const params = [email, password, nickname, phone]
+        const sql = `INSERT INTO USERS (user_email, user_password, user_nickname, user_phone) VALUES (?, ?, ?, ?);`
+        const params = [user_email, user_password, user_nickname, user_phone]
         const result = await res.pool.query(sql, params)
         res.status(200).json({'status' : 200, 'msg' : `회원가입에 성공했습니다.`})
     } catch (e) {
@@ -66,19 +66,19 @@ exports.signupAPI = async (req, res) => {
 
 exports.loginAPI =  async(req, res) => {
     try{
-        const email = req.body['email']
-        const pw = req.body['password']
+        const user_email = req.body['user_email']
+        const user_password = req.body['user_password']
 
-        const result = await res.pool.query(`SELECT * FROM USER WHERE email = ?`, [email])
+        const result = await res.pool.query(`SELECT * FROM USERS WHERE user_email = ?`, [user_email])
 
-        let db_pw = result[0][0].password
+        let db_pw = result[0][0].user_password
 
         const decipher = await crypto.createDecipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기
         db_pw = await decipher.update(db_pw, 'base64', 'utf8');
         db_pw += await decipher.final('utf8');
 
-        if (pw === db_pw){
-            let token = await createToken(result[0][0].id);
+        if (user_password === db_pw){
+            let token = await createToken(result[0][0].user_no);
             await res.status(200).json({'status' : 200, 'token' : token});
         } else {
             res.status(400).json({'status' : 400, 'msg' : `비밀번호가 일치하지 않습니다.`})

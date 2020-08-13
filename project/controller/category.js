@@ -8,7 +8,7 @@ require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
 exports.listAPI = async (req, res) => {
     try{
-        const result = await res.pool.query(`SELECT * FROM CATEGORY`)
+        const result = await res.pool.query(`SELECT * FROM CATEGORIES`)
         if(result.length > 0){
             res.status(200).json({'status' : 200, 'msg' : result[0]})
         } else {
@@ -23,13 +23,12 @@ exports.listAPI = async (req, res) => {
 
 exports.selectCategory = async (req, res) => {
     try{
-        const category = req.body['name']
-        let sql = `SELECT id FROM CATEGORY WHERE name = ?;`
-        let result = await res.pool.query(sql, [category])
-        // console.log('result.id :', result[0][0].id)
+        const category_name = req.body['category_name']
+        let sql = `SELECT category_no FROM CATEGORIES WHERE category_name = ?;`
+        let result = await res.pool.query(sql, [category_name])
 
-        sql = `SELECT * FROM PRODUCT WHERE category_id = ?;`
-        result = await res.pool.query(sql, [result[0][0].id])
+        sql = `SELECT * FROM PRODUCTS WHERE category_no = ?;`
+        result = await res.pool.query(sql, [result[0][0].category_no])
 		// console.log('result : ', result)
         if(result[0].length === 0){
             res.status(204).json({'status' : 204, 'msg' : `해당 카테고리에 상품이 없습니다.`})

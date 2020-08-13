@@ -2,7 +2,7 @@ import urllib.request as request
 from urllib import parse
 import json
 import pymysql
-from db_setting import db
+from .db_setting import db
 # 퍼센트 인코딩 : https://brownbears.tistory.com/501
 
 base_url = "http://store.naver.com/sogum/api/businesses?start=1&display=10&query="
@@ -10,7 +10,7 @@ sorting = "&sortingOrder=reviewCount"
 
 conn = pymysql.connect(host=db['host'], user=db['user'], password=db['password'], db=db['db'], charset=db['charset'])
 curs = conn.cursor(pymysql.cursors.DictCursor)
-sql = "INSERT INTO product (name, introduce, location, thumbnail, category, phone) VALUES (%s, %s, %s, %s, %s, %s)"
+sql = "INSERT INTO PRODUCTS (product_name, product_introduce, product_location, product_thumbnail, product_category, product_phone) VALUES (%s, %s, %s, %s, %s, %s)"
 
 # 회원 location은 db저장 필요없음. 매장의 location은 db저장(table을 나눌까-주소 테이블)
 # location : 서울 + category id : 2(실내놀이터)
@@ -27,17 +27,17 @@ data = j['items']
 print('data : ', data, ', length : ', len(data)) # item 들만 가져오기
 
 for i in range(0, len(data)):
-    name = data[i]['name']
+    product_name = data[i]['product_nm']
     introduce = data[i]['category']
     commonAddr = data[i]['commonAddr']
     addr = data[i]['addr']
-    location = commonAddr + ' ' + addr
-    thumbnail = data[i]['imageSrc']
-    category = 2
-    phone = data[i]['phone']
+    product_location = commonAddr + ' ' + addr
+    product_thumbnail = data[i]['imageSrc']
+    product_category = 2
+    product_phone = data[i]['phone']
     
     
-    params = (name, introduce, location, thumbnail, category, phone)
+    params = (product_name, product_introduce, product_location, product_thumbnail, product_category, product_phone)
     curs.execute(sql, params)
 
 conn.commit()
