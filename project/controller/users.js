@@ -51,11 +51,11 @@ exports.signupAPI = async (req, res) => {
         const user_phone = req.body['user_phone']
 
         const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기(같은 pw면 같에 암호화 된다.)
-        let password = cipher.update(pw, 'utf8','base64');
+        let password = cipher.update(user_password, 'utf8','base64');
         password += cipher.final('base64');
 
         const sql = `INSERT INTO USERS (user_email, user_password, user_nickname, user_phone) VALUES (?, ?, ?, ?);`
-        const params = [user_email, user_password, user_nickname, user_phone]
+        const params = [user_email, password, user_nickname, user_phone]
         const result = await res.pool.query(sql, params)
         res.status(200).json({'status' : 200, 'msg' : `회원가입에 성공했습니다.`})
     } catch (e) {
@@ -72,6 +72,7 @@ exports.loginAPI =  async(req, res) => {
         const result = await res.pool.query(`SELECT * FROM USERS WHERE user_email = ?`, [user_email])
 
         let db_pw = result[0][0].user_password
+        console.log('db_pw', db_pw)
 
         const decipher = await crypto.createDecipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기
         db_pw = await decipher.update(db_pw, 'base64', 'utf8');

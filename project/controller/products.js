@@ -29,14 +29,14 @@ exports.review = async(req, res) => {
         console.log('result decoded id : ', result.decoded['user_no'])
         if (result) {
             const product_no = req.body['product_no']
-            const user_no = result.decoded['user_on']
+            const user_no = result.decoded['user_no']
             const review_title = req.body['review_title']
             const review_content = req.body['review_content']
             const review_evaluation = req.body['review_evaluation'] // 별점
             const review_image = req.body['review_image']
             const review_created_at = new Date()
             
-            const sql = `INSERT INTO PRODUCT_REVIEW (product_no, user_no, review_title, review_content, review_evaluation, review_created_at, review_image) VALUES (?, ?, ?, ?, ?, ?, ?)`
+            const sql = `INSERT INTO PRODUCT_REVIEWS (product_no, user_no, review_title, review_content, review_evaluation, review_created_at, review_image) VALUES (?, ?, ?, ?, ?, ?, ?)`
             const params = [product_no, user_no, review_title, review_content, review_evaluation, review_created_at, review_image]
             result = await res.pool.query(sql, params)
             console.log(result)
