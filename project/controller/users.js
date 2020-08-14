@@ -7,14 +7,14 @@ const key = require('../config/settings.js').secretKey;
 const crypto = require('crypto');
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
-async function createToken(user_no) {
+async function createToken(user_no) { // 토큰 생성
     // 기본 알고리즘 : HMAC SHA256
     // 알고리즘 변경 할 수 있다. https://github.com/auth0/node-jsonwebtoken#usage
     const token = jwt.sign({user_no: user_no}, key.secretKey);
     return token;
 }
 
-exports.emailCheckAPI = async (req, res) => { 
+exports.emailCheckAPI = async (req, res) => { // 이메일 중복체크
     try {
         const params = [req.body['email']]
         const result = await res.pool.query(`SELECT * FROM USERS WHERE  user_email = ?`, params)
@@ -29,7 +29,7 @@ exports.emailCheckAPI = async (req, res) => {
     }
 }
 
-exports.getUserAPI = async (req, res) => {
+exports.getUserAPI = async (req, res) => { // 회원리스트(테스트용)
     try{
         const result = await res.pool.query(`SELECT * FROM USERS`)
         if(result.length > 0){
@@ -43,7 +43,7 @@ exports.getUserAPI = async (req, res) => {
     }
 }
 
-exports.signupAPI = async (req, res) => {
+exports.signupAPI = async (req, res) => { // 회원가입
     try{
         const user_email = req.body['user_email']
         const user_password = req.body['user_password']
@@ -64,7 +64,7 @@ exports.signupAPI = async (req, res) => {
     }
 }
 
-exports.loginAPI =  async(req, res) => {
+exports.loginAPI =  async(req, res) => { // 회원 로그인(토큰 생성)
     try{
         const user_email = req.body['user_email']
         const user_password = req.body['user_password']

@@ -6,7 +6,7 @@ const key = require('../config/settings.js').secretKey;
 
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
-exports.listAPI = async (req, res) => {
+exports.listAPI = async (req, res) => { // 홈화면에 카테고리 띄울 때
     try{
         const result = await res.pool.query(`SELECT * FROM CATEGORIES`)
         if(result.length > 0){
@@ -21,7 +21,7 @@ exports.listAPI = async (req, res) => {
 }
 
 
-exports.selectCategory = async (req, res) => {
+exports.selectCategory = async (req, res) => { // 카테고리를 선택해서 상품목록을 띄울 때
     try{
         const category_name = req.body['category_name']
         let sql = `SELECT category_no FROM CATEGORIES WHERE category_name = ?;`
