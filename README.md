@@ -1,7 +1,8 @@
 ## internship_project
 ubuntu(16.04, aws) + node.js(express.js) + mysql <br>
 IDE : vscode (ubuntu와 ftp 연결) <br>
-<a href='https://github.com/ujin2021/2020_summer_internship'>관련 피드백</a>
+<a href='https://github.com/ujin2021/2020_summer_internship'>관련 피드백</a> <br>
+<a href='https://user-images.githubusercontent.com/53362054/90225282-06baaf00-de4c-11ea-98bd-508a8b94d706.png'>현재 db</a>
 <br>
 ### dependencies
 * (node, npm, pm2, express 설치)
