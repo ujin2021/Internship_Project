@@ -26,7 +26,7 @@ IDE : vscode (ubuntu와 ftp 연결) <br>
 <br>
 
 ### :crystal_ball: 구현할 것
-<a href="https://gist.github.com/ujin2021/3af9d78e30050203a4c53a09edf60482.js">endpoint</a> <br>
+<a href="https://gist.github.com/3af9d78e30050203a4c53a09edf60482.git">endpoint</a> <br>
 ✅ email 중복체크(POST) <br>
 ✅ signup(+password 암호화, 복호화)(POST)<br>
 ✅ login(+token 발급)(POST) <br>
