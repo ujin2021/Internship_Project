@@ -2,7 +2,7 @@
 ubuntu(16.04, aws) + node.js(express.js) + mysql <br>
 IDE : vscode (ubuntu와 ftp 연결) <br>
 <a href='https://github.com/ujin2021/2020_summer_internship'>관련 피드백</a> <br>
-<a href='https://user-images.githubusercontent.com/53362054/90225282-06baaf00-de4c-11ea-98bd-508a8b94d706.png'>현재 db</a>
+<a href='https://user-images.githubusercontent.com/53362054/91021473-cec32100-e62e-11ea-9ca7-6a4359213e6a.png'>현재 db</a>
 <br>
 ### :crystal_ball: dependencies
 * (node, npm, pm2, express 설치)
@@ -52,7 +52,7 @@ IDE : vscode (ubuntu와 ftp 연결) <br>
 :hearts: 리뷰 별점평균은 평균을 바로 구하기 힘들어서 evaluation_average -> evaluation_total로 변경. 별점수를 계속 더하고, 필요한 순간에 evaluation_total / review_count 를 계산해주는게 낫다고 판단. <br>
 :hearts: 리뷰, 조회 post가 올 때마다 count +1, 좋아요는 enable 을 true로 바꿀 땐 +1, false로 바꿀 땐 -1 해주었다. <br>
 
-⬜️ 쿠폰 <br>
+✅ 티켓 <br>
 
 ### :feet:좀더 나아가서 
 * db 조회하는 것이 중복이 많아서 좀더 간결하게 표현하고 싶은데 어떻게 할 것인가. -> 일단 함수별로 처리하는 것이 달라서 하나로 합칠 수 는 없고, 알아보니 Sequelize 라는 ORM이 있었다. 테이블 생성을 할 수 있고, crud작업 시 간결한 표현으로 나타낼 수 있다. (약간 django models.py와 migrations 느낌.)
