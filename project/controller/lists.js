@@ -58,4 +58,19 @@ exports.review = async(req, res) => { // 상품 리뷰를 클릭했을 때 띄�
     }
 }
 
+exports.ticket = async(req, res) => { // 해당상품의 티켓(리스트만)
+    try {
+        const product_no = req.body['product_no']
+        const result = await res.pool.query(`SELECT ticket_no, ticket_name, ticket_usage_period, available_usage_time, ticket_price FROM TICKETS WHERE product_no = ? AND ticket_enable = 1;`, product_no)
+        console.log('result : ', result[0])
+        if (result[0].length === 0){
+            res.status(200).json({'status' : 200, 'msg' : `티켓이 없습니다`})
+        }
+        res.status(200).json({'status' : 200, 'msg' : result[0]})
+    } catch (e) {
+        console.error(e)
+
+    }
+}
+
 module.exports = exports
