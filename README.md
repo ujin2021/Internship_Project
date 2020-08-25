@@ -2,7 +2,8 @@
 ubuntu(16.04, aws) + node.js(express.js) + mysql <br>
 IDE : vscode (ubuntu와 ftp 연결) <br>
 <a href='https://github.com/ujin2021/2020_summer_internship'>관련 피드백</a> <br>
-<a href='https://user-images.githubusercontent.com/53362054/91158067-1914d280-e701-11ea-9b04-eb3f725ea048.png'>현재 db</a>
+<a href='https://user-images.githubusercontent.com/53362054/91158067-1914d280-e701-11ea-9b04-eb3f725ea048.png'>db tables</a> <br>
+<a href='https://gist.github.com/56bcea1e2bf7f3b0ffe24ca9af6ac7a6.git'>db 스키마 정리</a>
 <br>
 ### :crystal_ball: dependencies
 * (node, npm, pm2, express 설치)
@@ -58,3 +59,4 @@ IDE : vscode (ubuntu와 ftp 연결) <br>
 
 ### :feet:좀더 나아가서 
 * db 조회하는 것이 중복이 많아서 좀더 간결하게 표현하고 싶은데 어떻게 할 것인가. -> 일단 함수별로 처리하는 것이 달라서 하나로 합칠 수 는 없고, 알아보니 Sequelize 라는 ORM이 있었다. 테이블 생성을 할 수 있고, crud작업 시 간결한 표현으로 나타낼 수 있다. (약간 django models.py와 migrations 느낌.)
+* api 정리
