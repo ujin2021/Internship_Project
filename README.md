@@ -54,5 +54,7 @@ IDE : vscode (ubuntu와 ftp 연결) <br>
 
 ✅ 티켓 <br>
 ✅ 쿠폰 <br>
+=> 티켓구매와 쿠폰사용 등 엮인 부분을 처리할 때 query 문을 너무 많이 쓴다는 느낌.. 어떻게 줄일 수 있을지 cleancode, refactoring 하기(orm 알아보기..)
+
 ### :feet:좀더 나아가서 
 * db 조회하는 것이 중복이 많아서 좀더 간결하게 표현하고 싶은데 어떻게 할 것인가. -> 일단 함수별로 처리하는 것이 달라서 하나로 합칠 수 는 없고, 알아보니 Sequelize 라는 ORM이 있었다. 테이블 생성을 할 수 있고, crud작업 시 간결한 표현으로 나타낼 수 있다. (약간 django models.py와 migrations 느낌.)
