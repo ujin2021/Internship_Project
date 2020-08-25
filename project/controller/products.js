@@ -135,7 +135,8 @@ exports.productLog = async(req, res) => { // 상품 조회 로그(회원별-로�
     }
 }
 
-exports.buyTicket = async(req, res) => { // 쿠폰 사용 시 쿠폰확인(사용가능한 쿠폰리스트들 보내주기-> 사용자가 쿠폰을 선택하면 쿠폰 no를 보내준다. 없으면 0)
+// CLEAN CODE!!
+exports.buyTicket = async(req, res) => { // 회원이 쿠폰을 사용했는지 확인 -> 사용했다면 user_coupons 의 enable을 바꾸고 log에 저장
     const conn = await res.pool.getConnection()
     try {
         const jwtResult = req.user
@@ -147,25 +148,31 @@ exports.buyTicket = async(req, res) => { // 쿠폰 사용 시 쿠폰확인(사�
             const ticket_quantity = req.body['ticket_quantity']
             const ticket_total_price = req.body['ticket_total_price']
             const ticket_purchase_at = new Date()
-
-            const user_coupon_no = req.body['user_coupon_no'] //coupon 사용시 user_counpon_no, 미사용시 0
-            let ticket_discount = 0
-            if(user_coupon_no !== 0){
-                const coupon_result = await conn.query(`SELECT coupon_no FROM USER_COUPONS WHERE user_coupon_no = ?;`, user_coupon_no)
-                const discount_result = await conn.query(`SELECT coupon_discount_percent FROM COUPONS WHERE coupon_no = ?;`, coupon_result[0][0]['coupon_no'])
-                ticket_discount = discount_result[0][0]['coupon_discount_percent']
+            const coupon_no = req.body['coupon_no'] // 사용했다면 coupon_no, 사용하지 않았으면 0
+            let ticket_discount = 0 // 쿠폰을 사용안했다면 0, 사용했다면 쿠폰에 따라 할인이 달라짐
+            if (coupon_no !== 0){ // 쿠폰을 사용했다면
+                const discount = await conn.query(`SELECT coupon_discount_percent FROM COUPONS WHERE coupon_no = ?`, coupon_no)
+                ticket_discount = discount[0][0]['coupon_discount_percent']
+                console.log(ticket_discount)
             }
 
-            const sql = `INSERT INTO USER_TICKETS (user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at) VALUES (?, ?, ?, ?, ?, ?)`
-            const params = [user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at]
             conn.beginTransaction()
+            const sql = `INSERT INTO USER_TICKETS (user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at, user_ticket_enable) 
+                VALUES (?, ?, ?, ?, ?, ?, ?);`
+            const params = [user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at, 1]
             const result = await conn.query(sql, params)
-            if(user_coupon_no !== 0){
-                const user_ticket_no = result[0]['insertId']
-                const use_coupon = await conn.query(`INSERT INTO LOG_USE_COUPONS (user_ticket_no, user_coupon_no, coupon_used_at) VALUES (?, ?, ?);`, [user_ticket_no, user_coupon_no, ticket_purchase_at])
+            console.log('result : ', result)
+            const user_ticket_no = result[0]['insertId']
+            if(coupon_no !== 0) {
+                const upd_result = await conn.query(`UPDATE USER_COUPONS SET user_coupon_enable = 0 WHERE user_no = ? AND coupon_no = ?;`, [user_no, coupon_no])
+                console.log('upd_result : ', upd_result)
+                const sel_result = await conn.query(`SELECT user_coupon_no FROM USER_COUPONS WHERE user_no = ? AND coupon_no = ? AND user_coupon_enable = 0`, [user_no, coupon_no])
+                const ins_result = await conn.query(`INSERT INTO LOG_USE_COUPONS (user_ticket_no, user_coupon_no, coupon_used_at, use_coupon_enable) 
+                VALUES (?, ?, ?, ?);`, [user_ticket_no, sel_result[0][0]['user_coupon_no'], ticket_purchase_at, 1])
+                console.log('ins_result : ', ins_result)
+                
             }
             conn.commit()
-            
             res.status(200).json({'status' : 200, 'msg' : `티켓 구매 성공`})
         } else {
             res.status(400).json({'status' : 400, 'msg' : `로그인이 필요한 서비스 입니다.`})
@@ -178,23 +185,7 @@ exports.buyTicket = async(req, res) => { // 쿠폰 사용 시 쿠폰확인(사�
     }
 }
 
-exports.availableCoupon = async(req, res) => {
-    const conn = await res.pool.getConnection()
-    try {
-        const jwtResult = req.user
-        console.log('jwtDecode result : ', jwtResult)
-        
-        if(jwtResult){
-            const user_no = jwtResult.user_no
-            
-        } else {
-            res.status(400).json({'status' : 400, 'msg' : `로그인이 필요한 서비스 입니다.`})
-        }
-    } catch (e) {
-        console.error(e)
-    } finally {
-        conn.release
-    }
-}
+// exports.availableCoupon = async(req, res) => {
+// }
 
 module.exports = exports

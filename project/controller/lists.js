@@ -60,16 +60,36 @@ exports.review = async(req, res) => { // 상품 리뷰를 클릭했을 때 띄�
 
 exports.ticket = async(req, res) => { // 해당상품의 티켓(리스트만)
     try {
+        const jwtResult = req.user
+        console.log('jwtDecode result : ', jwtResult)
         const product_no = req.body['product_no']
-        const result = await res.pool.query(`SELECT ticket_no, ticket_name, ticket_usage_period, available_usage_time, ticket_price FROM TICKETS WHERE product_no = ? AND ticket_enable = 1;`, product_no)
-        console.log('result : ', result[0])
-        if (result[0].length === 0){
+
+        const ticket_result = await res.pool.query(`SELECT ticket_no, ticket_name, ticket_price, ticket_use_period, available_use
+        FROM TICKETS WHERE product_no = ? AND ticket_enable = 1;`, product_no) // 해당 상품에 대한 티켓들을 select 한다
+        console.log('ticket result : ', ticket_result[0])
+
+        if (ticket_result[0].length === 0){
             res.status(200).json({'status' : 200, 'msg' : `티켓이 없습니다`})
         }
-        res.status(200).json({'status' : 200, 'msg' : result[0]})
+
+        if(jwtResult){
+            const user_no = jwtResult.user_no
+            const user_coupon = await res.pool.query(`SELECT coupon_no FROM USER_COUPONS WHERE user_no = ? AND user_coupon_enable;`, user_no) // 회원의 쿠폰을 조회한다
+            if (user_coupon[0].length === 0) { // 만약 쿠폰이 없으면 빈 배열을 return 한다
+                res.status(200).json({'status' : 200, 'ticket' : ticket_result[0], 'coupon' : []})
+            }
+            let coupon_arr = []
+            for (let i = 0; i < user_coupon[0].length; i++) {
+                coupon_arr.push(user_coupon[0][i]['coupon_no'])
+            }
+            const coupon_list = await res.pool.query(`SELECT coupon_no, coupon_name, coupon_discount_percent, coupon_end_at, coupon_requirement 
+            FROM COUPONS WHERE coupon_no IN (` + coupon_arr.join(', ') + `) AND product_no = ${product_no} AND coupon_enable = 1`) // 해당 상품에 대한 쿠폰이 있는지 조회한다
+            res.status(200).json({'status' : 200, 'ticket' : ticket_result[0], 'coupon' : coupon_list[0]}) // 쿠폰이 존재하면 쿠폰정보들을 보내준다
+        } else { // 회원이 아니라면 티켓만 보내준다
+            res.status(200).json({'status' : 200, 'ticket' : ticket_result[0]})
+        }
     } catch (e) {
         console.error(e)
-
     }
 }
 
