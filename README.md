@@ -2,7 +2,7 @@
 ubuntu(16.04, aws) + node.js(express.js) + mysql <br>
 IDE : vscode (ubuntu와 ftp 연결) <br>
 <a href='https://github.com/ujin2021/2020_summer_internship'>관련 피드백</a> <br>
-<a href='https://user-images.githubusercontent.com/53362054/91021473-cec32100-e62e-11ea-9ca7-6a4359213e6a.png'>현재 db</a>
+<a href='https://user-images.githubusercontent.com/53362054/91158067-1914d280-e701-11ea-9b04-eb3f725ea048.png'>현재 db</a>
 <br>
 ### :crystal_ball: dependencies
 * (node, npm, pm2, express 설치)
