@@ -1,4 +1,6 @@
 const express = require('express');
+const { category } = require('./lists');
+const consoleStamp = require('console-stamp');
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
 exports.myLike = async(req, res) => { // 나의 찜하기 목록을 보여줌 -> product_no말고 진짜 product no에 해당하는 상품 정보를 띄워주기
@@ -69,8 +71,8 @@ exports.myReview = async(req, res) => {
     try {
         const jwtResult = req.user
         console.log('jwtDecode result : ', jwtResult)
-        const user_no = jwtResult.user_no
         if (jwtResult){
+            const user_no = jwtResult.user_no
             const result = await conn.query(`SELECT review_title, review_content, review_evaluation, review_created_at 
             FROM PRODUCT_REVIEWS WHERE user_no = ? ORDER BY review_created_at DESC;`, user_no)
             console.log('review result : ', result[0])
@@ -90,12 +92,32 @@ exports.myTicket = async(req, res) => {
     try { 
         const jwtResult = req.user
         console.log('jwtDecode result : ', jwtResult)
-        const user_no = jwtResult.user_no
         if(jwtResult) {
+            const user_no = jwtResult.user_no
             const used_result = await conn.query(`SELECT * FROM USER_TICKETS WHERE user_no = ? AND user_ticket_enable = 0;`, user_no) // 사용한 티켓
             const unused_result = await conn.query(`SELECT * FROM USER_TICKETS WHERE user_no = ? AND user_ticket_enable = 1;`, user_no) // 미사용 티켓
             res.status(200).json({'status' : 200, 'used' : used_result[0], 'unused' : unused_result[0]})
         } else {
+            res.status(401).json({'status' : 401, 'msg' : `로그인이 필요한 서비스 입니다.`})
+        }
+    } catch (e) {
+        console.error(e)
+    } finally {
+        conn.release()
+    }
+}
+
+exports.myCoupon = async(req, res) => {
+    const conn = await res.pool.getConnection()
+    try{
+        const jwtResult = req.user
+        console.log('jwtDecode result : ', jwtResult)
+        if(jwtResult) {
+            const user_no = jwtResult.user_no
+            const coupon_result = await conn.query(`SELECT coupon_no FROM USER_COUPONS WHERE user_no = ? AND user_coupon_enable = 1;`, user_no)
+            const result = await conn.query(`SELECT * FROM COUPONS WHERE coupon_no = ?;`, coupon_result[0][0]['coupon_no'])
+            res.status(200).json({'status' : 200, 'msg' : result[0]})
+        } else { 
             res.status(401).json({'status' : 401, 'msg' : `로그인이 필요한 서비스 입니다.`})
         }
     } catch (e) {

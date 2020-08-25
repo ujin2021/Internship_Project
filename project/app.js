@@ -12,7 +12,7 @@ const listRouter = require('./routes/lists') // category list, product list, rev
 const productRouter = require('./routes/products') // productReview, Like, viewLog
 const myPageRouter = require('./routes/mypage') // myReview, myLog, myLike, myTicket
 const ticketRouter = require('./routes/tickets') // useTicket
-
+//const couponRouter = require('./routes/coupons')
 
 app.use(database.sql.pool('pool', {
     host : dbConfig.host,

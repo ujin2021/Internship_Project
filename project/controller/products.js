@@ -135,7 +135,7 @@ exports.productLog = async(req, res) => { // 상품 조회 로그(회원별-로�
     }
 }
 
-exports.buyTicket = async(req, res) => {
+exports.buyTicket = async(req, res) => { // 쿠폰 사용 시 쿠폰확인(사용가능한 쿠폰리스트들 보내주기-> 사용자가 쿠폰을 선택하면 쿠폰 no를 보내준다. 없으면 0)
     const conn = await res.pool.getConnection()
     try {
         const jwtResult = req.user
@@ -145,24 +145,55 @@ exports.buyTicket = async(req, res) => {
             const user_no = jwtResult.user_no
             const ticket_no = req.body['ticket_no']
             const ticket_quantity = req.body['ticket_quantity']
-            const ticket_discount = req.body['ticket_discount']
+            const ticket_total_price = req.body['ticket_total_price']
             const ticket_purchase_at = new Date()
-            const price_result = await conn.query(`SELECT ticket_price FROM TICKETS WHERE ticket_no = ?`, ticket_no)
-            console.log('price_result : ', price_result[0][0])
-            const ticket_total_price = ticket_quantity * price_result[0][0]['ticket_price']
-            console.log('ticket_total_price : ', ticket_total_price)
+
+            const user_coupon_no = req.body['user_coupon_no'] //coupon 사용시 user_counpon_no, 미사용시 0
+            let ticket_discount = 0
+            if(user_coupon_no !== 0){
+                const coupon_result = await conn.query(`SELECT coupon_no FROM USER_COUPONS WHERE user_coupon_no = ?;`, user_coupon_no)
+                const discount_result = await conn.query(`SELECT coupon_discount_percent FROM COUPONS WHERE coupon_no = ?;`, coupon_result[0][0]['coupon_no'])
+                ticket_discount = discount_result[0][0]['coupon_discount_percent']
+            }
+
+            const sql = `INSERT INTO USER_TICKETS (user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at) VALUES (?, ?, ?, ?, ?, ?)`
             const params = [user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at]
-            const result = await conn.query(`INSERT INTO USER_TICKETS (user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at)
-            VALUES (?, ?, ?, ?, ?, ?)`, params)
-            console.log('insert result : ', result[0])
+            conn.beginTransaction()
+            const result = await conn.query(sql, params)
+            if(user_coupon_no !== 0){
+                const user_ticket_no = result[0]['insertId']
+                const use_coupon = await conn.query(`INSERT INTO LOG_USE_COUPONS (user_ticket_no, user_coupon_no, coupon_used_at) VALUES (?, ?, ?);`, [user_ticket_no, user_coupon_no, ticket_purchase_at])
+            }
+            conn.commit()
+            
             res.status(200).json({'status' : 200, 'msg' : `티켓 구매 성공`})
         } else {
             res.status(400).json({'status' : 400, 'msg' : `로그인이 필요한 서비스 입니다.`})
         }
     } catch (e) {
         console.error(e)
+        conn.rollback()
     } finally {
         conn.release()
+    }
+}
+
+exports.availableCoupon = async(req, res) => {
+    const conn = await res.pool.getConnection()
+    try {
+        const jwtResult = req.user
+        console.log('jwtDecode result : ', jwtResult)
+        
+        if(jwtResult){
+            const user_no = jwtResult.user_no
+            
+        } else {
+            res.status(400).json({'status' : 400, 'msg' : `로그인이 필요한 서비스 입니다.`})
+        }
+    } catch (e) {
+        console.error(e)
+    } finally {
+        conn.release
     }
 }
 

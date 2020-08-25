@@ -22,7 +22,7 @@ exports.useTicket = async(req, res) => {
             await conn.commit()
             res.status(200).json({'status' : 200, 'msg' : `티켓 사용이 완료되었습니다.`})
         } else {
-            res.status(400).json({'status' : 400, 'msg' : `로그인이 필요한 서비스 입니다.`})
+            res.status(401).json({'status' : 401, 'msg' : `로그인이 필요한 서비스 입니다.`})
         }
     } catch (e) {
         console.error(e)
@@ -32,5 +32,6 @@ exports.useTicket = async(req, res) => {
         conn.release()
     }
 }
+
 
 module.exports = exports
