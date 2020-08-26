@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const mypageController = require('../controller/mypage')
 
-const { jwtDecode } = require('../config/token')
+const { jwtDecode } = require('../settings/token')
 
 router.get('/likes', jwtDecode(), mypageController.myLike)
 router.get('/logs', jwtDecode(), mypageController.myLog)

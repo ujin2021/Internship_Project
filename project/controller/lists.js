@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const jwt = require('jsonwebtoken');
-const key = require('../config/settings.js').secretKey;
+const key = require('../settings/settings.js').secretKey;
 
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 

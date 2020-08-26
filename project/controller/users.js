@@ -2,9 +2,9 @@ const express = require('express')
 const router = express.Router()
 
 const jwt = require('jsonwebtoken')
-const generateToken = require('../config/token').generateToken
+const generateToken = require('../settings/token').generateToken
 
-const key = require('../config/settings.js').secretKey
+const key = require('../settings/settings.js').secretKey
 const crypto = require('crypto')
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l')
 
@@ -57,9 +57,9 @@ exports.signupAPI = async (req, res) => { // 회원가입
 
 exports.loginAPI =  async(req, res) => { // 회원 로그인(토큰 생성)
     try{
-        let req_to_json = JSON.parse(req)
-        let req_body_to_json = JSON.parse(req.body)
-        console.log(`req : ${req_to_json}, req.body : ${req_body_to_json}`)
+        // let req_to_json = JSON.parse(req)
+        // let req_body_to_json = JSON.parse(req.body)
+        // console.log(`req : ${req_to_json}, req.body : ${req_body_to_json}`)
         const {user_email, user_password} = req.body // 비구조화 할당
 
         const result = await res.pool.query(`SELECT * FROM USERS WHERE user_email = ?`, [user_email])

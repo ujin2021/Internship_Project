@@ -3,7 +3,7 @@ const { JsonWebTokenError } = require('jsonwebtoken');
 const { use, param } = require('../routes/products');
 const { connect } = require('http2');
 const { type } = require('os');
-const { jwtDecode } = require('../config/token');
+const { jwtDecode } = require('../settings/token');
 const router = express.Router();
 
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');

@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const ticketController = require('../controller/tickets')
 
-const { jwtDecode } = require('../config/token')
+const { jwtDecode } = require('../settings/token')
 
 router.post('/use', jwtDecode(), ticketController.useTicket)
 

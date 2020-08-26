@@ -3,7 +3,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=database,windows,git,node
 
 db_setting.py
-
+config/
+settings/
 ### Database ###
 *.accdb
 *.db

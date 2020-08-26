@@ -1,6 +1,6 @@
 
 const jwt = require('jsonwebtoken');
-const key = require('../config/settings.js').secretKey;
+const key = require('../settings/settings.js').secretKey;
 
 exports.tokenCheck = async (token) => {
     console.log('token : ', token);

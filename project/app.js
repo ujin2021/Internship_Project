@@ -1,8 +1,8 @@
 const express = require('express')
 const request = require('request')
-const database = require('./config/database')
-const dbConfig = require('./config/dbConfig').local
-const jwtDecode = require('./config/token').jwtDecode
+const database = require('./settings/database')
+const dbConfig = require('./settings/dbConfig').local
+const jwtDecode = require('./settings/token').jwtDecode
 const app = express();
 app.use(express.json()) // bodyParser 사용 설정
 
