@@ -20,8 +20,8 @@ exports.category = async (req, res) => { // 홈화면에 카테고리 띄울 때
     }
 }
 
-
-exports.product = async (req, res) => { // 카테고리를 선택해서 상품목록을 띄울 때
+// 카테고리를 선택해서 상품목록을 띄울 때 -> 별점(별점토/리뷰수), 리뷰수, 조회수, 찜하기수 (카테고리로 groupby? -> 어느카테고리가 가장 인기많은지 알수있을 듯)
+exports.product = async (req, res) => { 
     try{
         const category_name = req.body['category_name']
         let sql = `SELECT category_no FROM CATEGORIES WHERE category_name = ?;`

@@ -94,6 +94,7 @@ exports.myTicket = async(req, res) => {
         console.log('jwtDecode result : ', jwtResult)
         if(jwtResult) {
             const user_no = jwtResult.user_no
+            // ticket_no 를 뽑아서 ticket자체를 보내주기
             const used_result = await conn.query(`SELECT * FROM USER_TICKETS WHERE user_no = ? AND user_ticket_enable = 0;`, user_no) // 사용한 티켓
             const unused_result = await conn.query(`SELECT * FROM USER_TICKETS WHERE user_no = ? AND user_ticket_enable = 1;`, user_no) // 미사용 티켓
             res.status(200).json({'status' : 200, 'used' : used_result[0], 'unused' : unused_result[0]})
@@ -115,7 +116,15 @@ exports.myCoupon = async(req, res) => {
         if(jwtResult) {
             const user_no = jwtResult.user_no
             const coupon_result = await conn.query(`SELECT coupon_no FROM USER_COUPONS WHERE user_no = ? AND user_coupon_enable = 1;`, user_no)
-            const result = await conn.query(`SELECT * FROM COUPONS WHERE coupon_no = ?;`, coupon_result[0][0]['coupon_no'])
+            console.log(coupon_result[0])
+            if(coupon_result[0].length == 0) {
+                res.status(200).json({'status' : 200, 'msg' : `사용가능한 쿠폰이 없습니다.`})
+            }
+            let coupon_arr = []
+            for (let i = 0; i < coupon_result[0].length; i++) {
+                coupon_arr.push(coupon_result[0][i]['coupon_no'])
+            }
+            const result = await conn.query(`SELECT * FROM COUPONS WHERE coupon_no IN (` + coupon_arr.join(', ') + `);`)
             res.status(200).json({'status' : 200, 'msg' : result[0]})
         } else { 
             res.status(401).json({'status' : 401, 'msg' : `로그인이 필요한 서비스 입니다.`})

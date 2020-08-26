@@ -7,13 +7,6 @@ const generateToken = require('../config/token').generateToken
 const key = require('../config/settings.js').secretKey
 const crypto = require('crypto')
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l')
-/*
-async function createToken(user_no) { // 토큰 생성
-    // 기본 알고리즘 : HMAC SHA256
-    // 알고리즘 변경 할 수 있다. https://github.com/auth0/node-jsonwebtoken#usage
-    const token = jwt.sign({user_no: user_no}, key.secretKey, {expiresIn:'7d'});
-    return token;
-}*/
 
 exports.emailCheckAPI = async (req, res) => { // 이메일 중복체크
     try {
@@ -46,10 +39,7 @@ exports.getUserAPI = async (req, res) => { // 회원리스트(테스트용)
 
 exports.signupAPI = async (req, res) => { // 회원가입
     try{
-        const user_email = req.body['user_email']
-        const user_password = req.body['user_password']
-        const user_nickname = req.body['user_nickname']
-        const user_phone = req.body['user_phone']
+        const {user_email, user_password, user_nickname, user_phone} = req.body
 
         const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기(같은 pw면 같에 암호화 된다.)
         let password = cipher.update(user_password, 'utf8','base64');
@@ -67,8 +57,10 @@ exports.signupAPI = async (req, res) => { // 회원가입
 
 exports.loginAPI =  async(req, res) => { // 회원 로그인(토큰 생성)
     try{
-        const user_email = req.body['user_email']
-        const user_password = req.body['user_password']
+        let req_to_json = JSON.parse(req)
+        let req_body_to_json = JSON.parse(req.body)
+        console.log(`req : ${req_to_json}, req.body : ${req_body_to_json}`)
+        const {user_email, user_password} = req.body // 비구조화 할당
 
         const result = await res.pool.query(`SELECT * FROM USERS WHERE user_email = ?`, [user_email])
 

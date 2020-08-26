@@ -15,12 +15,8 @@ exports.productReview = async(req, res) => { // 리뷰 작성(로그인필요 ->
         console.log('jwtDecode result : ', jwtResult) // jwtDecode result :  { user_no: 2, iat: 1597310239 }
         
         if (jwtResult) {
-            const product_no = req.body['product_no']
+            const {product_no, review_title, review_content, review_evaluation, review_image} = req.body
             const user_no = jwtResult.user_no
-            const review_title = req.body['review_title']
-            const review_content = req.body['review_content']
-            const review_evaluation = req.body['review_evaluation'] // 별점
-            const review_image = req.body['review_image']
             const review_created_at = new Date()
             
             const sql = `INSERT INTO PRODUCT_REVIEWS (product_no, user_no, review_title, review_content, review_evaluation, review_created_at, review_image) VALUES (?, ?, ?, ?, ?, ?, ?);`
@@ -143,12 +139,9 @@ exports.buyTicket = async(req, res) => { // 회원이 쿠폰을 사용했는지 
         console.log('jwtDecode result : ', jwtResult)
         
         if(jwtResult){
+            const { ticket_no, ticket_quantity,ticket_total_price, coupon_no} = req.body // coupon 사용했다면 사용한 coupon_no, 사용하지 않았으면 0
             const user_no = jwtResult.user_no
-            const ticket_no = req.body['ticket_no']
-            const ticket_quantity = req.body['ticket_quantity']
-            const ticket_total_price = req.body['ticket_total_price']
             const ticket_purchase_at = new Date()
-            const coupon_no = req.body['coupon_no'] // 사용했다면 coupon_no, 사용하지 않았으면 0
             let ticket_discount = 0 // 쿠폰을 사용안했다면 0, 사용했다면 쿠폰에 따라 할인이 달라짐
             if (coupon_no !== 0){ // 쿠폰을 사용했다면
                 const discount = await conn.query(`SELECT coupon_discount_percent FROM COUPONS WHERE coupon_no = ?`, coupon_no)
@@ -184,8 +177,5 @@ exports.buyTicket = async(req, res) => { // 회원이 쿠폰을 사용했는지 
         conn.release()
     }
 }
-
-// exports.availableCoupon = async(req, res) => {
-// }
 
 module.exports = exports
