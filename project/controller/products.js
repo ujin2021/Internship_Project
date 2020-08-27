@@ -12,7 +12,7 @@ exports.productReview = async(req, res) => { // 리뷰 작성(로그인필요 ->
     const conn = await res.pool.getConnection()
     try{
         const jwtResult = req.user
-        console.log('jwtDecode result : ', jwtResult) // jwtDecode result :  { user_no: 2, iat: 1597310239 }
+        console.log('jwtDecode result : ', jwtResult) // jwtDecode result :  { user_no: 2, iat: 1598515210, exp: 1599120010 }
         
         if (jwtResult) {
             const {product_no, review_title, review_content, review_evaluation, review_image} = req.body

@@ -8,14 +8,21 @@ const key = require('../settings/settings.js').secretKey
 const crypto = require('crypto')
 require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l')
 
+// const models = require('../models/index')
+// const USERS = require('../models/USERS')
+
+// conn 쓰는것-> transaction(insert, update) 사용할 때 (소켓통신처럼 딱 연결을 해놓고)
+// 그냥 res.pool.query -> 조회할때 쓰면 된다.
+
 exports.emailCheckAPI = async (req, res) => { // 이메일 중복체크
     try {
-        const params = [req.body['email']]
-        const result = await res.pool.query(`SELECT * FROM USERS WHERE user_email = ?`, params)
-		if (result[0].length === 0) {
-            res.status(200).json({'status' : 200, 'msg' : `가입 가능한 이메일 주소 입니다.`})
+        const params = [req.body['user_email']]
+        const duplicated_email = await res.pool.query(`SELECT * FROM USERS WHERE user_email = ?`, params) 
+        // const duplicated_email = await models.USERS.findAll({where : {user_email : req.body['user_email']}}) orm-sequelize
+		if (duplicated_email[0].length === 0) {
+            res.status(200).json({'msg' : `가입 가능한 이메일 주소 입니다.`}) // json 보낼 때 wrap 해서 보내는게 서버의 유지보수가 쉽다.
         } else {
-            res.status(400).json({'status' : 400, 'msg' : `이미 가입된 이메일 주소 입니다.`})
+            res.status(400).json({'msg' : `이미 가입된 이메일 주소 입니다.`})
         }
     } catch (e) {
         console.error(e)
@@ -25,11 +32,11 @@ exports.emailCheckAPI = async (req, res) => { // 이메일 중복체크
 
 exports.getUserAPI = async (req, res) => { // 회원리스트(테스트용)
     try{
-        const result = await res.pool.query(`SELECT * FROM USERS`)
-        if(result.length > 0){
-            res.status(200).json(result[0])
+        const user_list = await res.pool.query(`SELECT * FROM USERS`)
+        if(user_list[0].length > 0){
+            res.status(200).json({'msg' : user_list[0]})
         } else {
-            res.status(204).json(`가입한 회원이 없습니다.`) // 204면 아무것도 안보내진다
+            res.status(204).json({'msg' : `가입한 회원이 없습니다.`}) // 204면 아무것도 안보내진다
         }
     } catch (e) {
         console.error(e)
@@ -41,14 +48,14 @@ exports.signupAPI = async (req, res) => { // 회원가입
     try{
         const {user_email, user_password, user_nickname, user_phone} = req.body
 
-        const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기(같은 pw면 같에 암호화 된다.)
+        const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기 -> mysql password() 사용하기
         let password = cipher.update(user_password, 'utf8','base64');
         password += cipher.final('base64');
 
-        const sql = `INSERT INTO USERS (user_email, user_password, user_nickname, user_phone) VALUES (?, ?, ?, ?);`
         const params = [user_email, password, user_nickname, user_phone]
-        const result = await res.pool.query(sql, params)
-        res.status(200).json({'status' : 200, 'msg' : `회원가입에 성공했습니다.`})
+        const create_user = await res.pool.query(`INSERT INTO USERS (user_email, user_password, user_nickname, user_phone) VALUES (?, ?, ?, ?)`, params)
+
+        res.status(200).json({'msg' : `회원가입에 성공했습니다.`})
     } catch (e) {
         console.error(e)
         res.status(503).json(e)
@@ -57,30 +64,21 @@ exports.signupAPI = async (req, res) => { // 회원가입
 
 exports.loginAPI =  async(req, res) => { // 회원 로그인(토큰 생성)
     try{
-        // let req_to_json = JSON.parse(req)
-        // let req_body_to_json = JSON.parse(req.body)
-        // console.log(`req : ${req_to_json}, req.body : ${req_body_to_json}`)
         const {user_email, user_password} = req.body // 비구조화 할당
+        
+        const cipher = crypto.createCipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기 -> mysql password() 사용하기
+        let password = cipher.update(user_password, 'utf8','base64');
+        password += cipher.final('base64');
 
-        const result = await res.pool.query(`SELECT * FROM USERS WHERE user_email = ?`, [user_email])
-
-        let db_pw = result[0][0].user_password
-        console.log('db_pw', db_pw)
-
-        const decipher = await crypto.createDecipher('aes-256-cbc', key.secretKey) // 암호화 방식 바꿔주기
-        db_pw = await decipher.update(db_pw, 'base64', 'utf8');
-        db_pw += await decipher.final('utf8');
-
-        if (user_password === db_pw){
-            let token = await generateToken(result[0][0].user_no);
-            await res.status(200).json({'status' : 200, 'token' : token});
-        } else {
-            res.status(400).json({'status' : 400, 'msg' : `비밀번호가 일치하지 않습니다.`})
+        const login_result = await res.pool.query(`SELECT user_no FROM USERS WHERE user_email = ? AND user_password = ?;`, [user_email, password])
+        if(login_result[0]) {
+            let token = await generateToken(login_result[0][0].user_no)
+            res.status(200).json({'msg' : `로그인에 성공했습니다.`, 'token' : token})
         }
     }catch (e) {
         console.error(e)
-        if (e instanceof TypeError){
-            await res.status(400).json({'status' : 400, 'msg' : `존재하지 않는 계정입니다.`});
+        if (e instanceof TypeError) {
+            res.status(400).json({'msg' : `로그인에 실패했습니다.`})
         }
         await res.status(503).json(e)
     }
