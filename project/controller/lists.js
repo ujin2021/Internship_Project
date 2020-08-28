@@ -66,7 +66,7 @@ exports.ticket = async(req, res) => { // 해당상품의 티켓(리스트만)
 
         const ticket_result = await res.pool.query(`SELECT ticket_no, ticket_name, ticket_price, ticket_use_period, available_use
         FROM TICKETS WHERE product_no = ? AND ticket_enable = 1;`, product_no) // 해당 상품에 대한 티켓들을 select 한다
-
+        
         if (ticket_result[0].length === 0){
             res.status(200).json({'msg' : `티켓이 없습니다`})
         }

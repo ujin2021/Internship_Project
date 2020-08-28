@@ -27,11 +27,10 @@ exports.productReview = async(req, res) => { // 리뷰 작성(로그인필요 ->
             sql_result = await conn.query(sql, params)
             upd_result = await conn.query(upd, [review_evaluation, product_no])
             await conn.commit()
-            
-            console.log(`리뷰 등록 완료`)
-            res.status(200).json({'status' : 200, 'msg' : `리뷰가 정상적으로 등록되었습니다.`})
+           
+            res.status(200).json({'msg' : `리뷰가 정상적으로 등록되었습니다.`})
         } else { 
-            res.status(401).json({'status' : 401, 'msg' : `로그인이 필요한 서비스 입니다.`})
+            res.status(401).json({'msg' : `로그인이 필요한 서비스 입니다.`})
         }
     } catch (e) {
         console.error('product err : ', e)
@@ -77,9 +76,9 @@ exports.productLike = async(req, res) => { // 찜하기 기능(한번더 누르�
             upd_result = await conn.query(upd, product_no)
             await conn.commit()
 
-            res.status(200).json({'status' : 200, 'msg' : msg})
+            res.status(200).json({'msg' : msg})
         } else { 
-            res.status(401).json({'status' : 401, 'msg' : `로그인이 필요한 서비스 입니다.`})
+            res.status(401).json({'msg' : `로그인이 필요한 서비스 입니다.`})
         }
     } catch (e) {
         console.error(e)
@@ -118,9 +117,9 @@ exports.productLog = async(req, res) => { // 상품 조회 로그(회원별-로�
             count_result = await conn.query(count_upd, product_no)
             await conn.commit()
             console.log(`조회수 업데이트`)
-            res.status(200).json({'status' : 200, 'msg' : `최근 본 상품에 등록되었습니다.`})
+            res.status(200).json({'msg' : `최근 본 상품에 등록되었습니다.`})
         } else { 
-            res.status(401).json({'status' : 401, 'msg' : `로그인이 필요한 서비스 입니다.`})
+            res.status(401).json({'msg' : `로그인이 필요한 서비스 입니다.`})
         }
     } catch (e) {
         console.error(e)
@@ -143,7 +142,7 @@ exports.buyTicket = async(req, res) => { // 회원이 쿠폰을 사용했는지 
             const user_no = jwtResult.user_no
             const ticket_purchase_at = new Date()
             let ticket_discount = 0 // 쿠폰을 사용안했다면 0, 사용했다면 쿠폰에 따라 할인이 달라짐
-            if (coupon_no !== 0){ // 쿠폰을 사용했다면
+            if (coupon_no !== 0){ // 쿠폰을 사용했다면 할인율을 조회
                 const discount = await conn.query(`SELECT coupon_discount_percent FROM COUPONS WHERE coupon_no = ?`, coupon_no)
                 ticket_discount = discount[0][0]['coupon_discount_percent']
                 console.log(ticket_discount)
@@ -153,26 +152,27 @@ exports.buyTicket = async(req, res) => { // 회원이 쿠폰을 사용했는지 
             const sql = `INSERT INTO USER_TICKETS (user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at, user_ticket_enable) 
                 VALUES (?, ?, ?, ?, ?, ?, ?);`
             const params = [user_no, ticket_no, ticket_quantity, ticket_total_price, ticket_discount, ticket_purchase_at, 1]
-            const result = await conn.query(sql, params)
+            const result = await conn.query(sql, params) // user의 ticket 사용내역에 insert
             console.log('result : ', result)
-            const user_ticket_no = result[0]['insertId']
-            if(coupon_no !== 0) {
+            const user_ticket_no = result[0]['insertId'] // user의 ticket 사용내역에 insert 된 coulumn id
+
+            if(coupon_no !== 0) { // 쿠폰을 사용했다면 사용자 쿠폰 사용가능을 사용불가로 update, 사용자 쿠폰 log 에 정보 insert
                 const upd_result = await conn.query(`UPDATE USER_COUPONS SET user_coupon_enable = 0 WHERE user_no = ? AND coupon_no = ?;`, [user_no, coupon_no])
                 console.log('upd_result : ', upd_result)
                 const sel_result = await conn.query(`SELECT user_coupon_no FROM USER_COUPONS WHERE user_no = ? AND coupon_no = ? AND user_coupon_enable = 0`, [user_no, coupon_no])
                 const ins_result = await conn.query(`INSERT INTO LOG_USE_COUPONS (user_ticket_no, user_coupon_no, coupon_used_at, use_coupon_enable) 
                 VALUES (?, ?, ?, ?);`, [user_ticket_no, sel_result[0][0]['user_coupon_no'], ticket_purchase_at, 1])
                 console.log('ins_result : ', ins_result)
-                
             }
             conn.commit()
-            res.status(200).json({'status' : 200, 'msg' : `티켓 구매 성공`})
+            res.status(200).json({'msg' : `티켓 구매 성공`})
         } else {
-            res.status(400).json({'status' : 400, 'msg' : `로그인이 필요한 서비스 입니다.`})
+            res.status(400).json({'msg' : `로그인이 필요한 서비스 입니다.`})
         }
     } catch (e) {
         console.error(e)
         conn.rollback()
+        res.status(503).json(e)
     } finally {
         conn.release()
     }

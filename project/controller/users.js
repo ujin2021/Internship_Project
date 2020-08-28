@@ -71,15 +71,15 @@ exports.loginAPI =  async(req, res) => { // 회원 로그인(토큰 생성)
         password += cipher.final('base64');
 
         const login_result = await res.pool.query(`SELECT user_no FROM USERS WHERE user_email = ? AND user_password = ?;`, [user_email, password])
-        if(login_result[0]) {
+        
+        if(login_result[0].length !== 0) {
             let token = await generateToken(login_result[0][0].user_no)
             res.status(200).json({'msg' : `로그인에 성공했습니다.`, 'token' : token})
+        } else {
+            res.status(400).json({'msg' : `로그인에 실패했습니다.`})
         }
     }catch (e) {
         console.error(e)
-        if (e instanceof TypeError) {
-            res.status(400).json({'msg' : `로그인에 실패했습니다.`})
-        }
         await res.status(503).json(e)
     }
 }
