@@ -8,7 +8,7 @@ exports.useTicket = async(req, res) => {
         console.log('jwtDecode result : ', jwtResult)
         
         if(jwtResult){
-            const ticket_no = req.body['ticket_no']
+            const ticket_no = req.params.ticket_no
             const user_no = jwtResult.user_no
             const ticket_used_at = new Date()
     

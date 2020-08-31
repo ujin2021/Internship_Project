@@ -9,7 +9,7 @@ require('console-stamp')(console, 'yyyy/mm/dd HH:MM:ss.l');
 
 exports.category = async (req, res) => { // 홈화면에 카테고리 띄울 때
     try{
-        const category_list = await res.pool.query(`SELECT category_name FROM CATEGORIES`) // icon도 보내줘야함
+        const category_list = await res.pool.query(`SELECT * FROM CATEGORIES`) // icon도 보내줘야함
         if(category_list[0].length > 0){
             res.status(200).json(category_list[0]) 
         } else {
@@ -24,11 +24,10 @@ exports.category = async (req, res) => { // 홈화면에 카테고리 띄울 때
 // 카테고리를 선택해서 상품목록을 띄울 때 -> 별점(별점평균/리뷰수), 리뷰수, 조회수, 찜하기수 (카테고리로 groupby? -> 어느카테고리가 가장 인기많은지 알수있을 듯)
 exports.product = async (req, res) => { 
     try{
-        const category_name = req.body['category_name']
+        const category_no = req.params.category_no
         
-        sel_sql = `SELECT * FROM CATEGORIES JOIN PRODUCTS ON CATEGORIES.category_name = ? AND CATEGORIES.category_no = PRODUCTS.category_no
-        AND CATEGORIES.category_enable = 1 AND PRODUCTS.product_enable = 1;`
-        const product_list = await res.pool.query(sel_sql, category_name)
+        sel_sql = `SELECT * FROM PRODUCTS WHERE category_no = ?;`
+        const product_list = await res.pool.query(sel_sql, category_no)
         
         if(product_list[0].length === 0){
             res.status(200).json({'msg' : `해당 카테고리에 상품이 없습니다.`})
@@ -44,7 +43,7 @@ exports.product = async (req, res) => {
 
 exports.review = async(req, res) => { // 상품 리뷰를 클릭했을 때 띄워주는 것
     try{
-        const params = [req.body['product_no']]
+        const params = req.params.product_no
         const result = await res.pool.query(`SELECT * FROM PRODUCT_REVIEWS WHERE product_no = ?;`, params)
         if (result[0].length > 0){
             res.status(200).json({'msg' : result[0]})
@@ -62,7 +61,7 @@ exports.ticket = async(req, res) => { // 해당상품의 티켓(리스트만)
     try {
         const jwtResult = req.user
         console.log('jwtDecode result : ', jwtResult)
-        const product_no = req.body['product_no']
+        const product_no = req.params.product_no
 
         const ticket_result = await res.pool.query(`SELECT ticket_no, ticket_name, ticket_price, ticket_use_period, available_use
         FROM TICKETS WHERE product_no = ? AND ticket_enable = 1;`, product_no) // 해당 상품에 대한 티켓들을 select 한다

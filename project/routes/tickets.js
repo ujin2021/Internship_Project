@@ -4,6 +4,6 @@ const ticketController = require('../controller/tickets')
 
 const { jwtDecode } = require('../settings/token')
 
-router.post('/use', jwtDecode(), ticketController.useTicket)
+router.get('/use/:ticket_no', jwtDecode(), ticketController.useTicket)
 
 module.exports = router

@@ -48,7 +48,7 @@ exports.productLike = async(req, res) => { // 찜하기 기능(한번더 누르�
         console.log('jwtDecode result : ', jwtResult)
         
         if(jwtResult){
-            const product_no = req.body['product_no']
+            const product_no = req.params.product_no
             const user_no = jwtResult.user_no
             let sql = `SELECT * FROM PRODUCT_LIKES WHERE product_no = ? AND user_no = ?;`
             const params = [product_no, user_no]
@@ -96,7 +96,7 @@ exports.productLog = async(req, res) => { // 상품 조회 로그(회원별-로�
         console.log('jwtDecode result : ', jwtResult)
 
         if(jwtResult){
-            const product_no = req.body['product_no']
+            const product_no = req.params.product_no
             const user_no = jwtResult.user_no
             const log_at = new Date()
             const sel = `SELECT * FROM LOG_PRODUCTS WHERE product_no = ? AND user_no = ?;`
