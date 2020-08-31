@@ -7,7 +7,7 @@ IDE : vscode (ubuntu와 ftp 연결) <br>
 ### :crystal_ball: <a href='https://github.com/ujin2021/internship_project/blob/master/project/package.json'>dependencies</a>
 
 ### :crystal_ball: 구현한 것
-<a href="https://gist.github.com/3af9d78e30050203a4c53a09edf60482.git">endpoint</a> <br>
+<a href="https://app.gitbook.com/@ujin2021/s/summer-internship/@merged">endpoint</a> <br>
 ✅ email 중복체크<br>
 ✅ signup <br>
 ✅ login(jwt 인증 기반) <br>
@@ -25,5 +25,4 @@ IDE : vscode (ubuntu와 ftp 연결) <br>
 :hearts: 리뷰, 조회 post가 올 때마다 count +1, 좋아요는 enable 을 true로 바꿀 땐 +1, false로 바꿀 땐 -1 해주었다. <br>
 
 ### :feet:좀더 나아가서 
-* api 정리
 * ~~sequelize 적용(설치 및 sequelize-auto 설정 완료 -> query 문을 orm으로 변경하기, db연결 확인하기)~~ => 일단은 query문을 써도 괜찮다. (개발자 수가 적을때, 사용하는 유저가 적을때) 그리고 아직 query문(join, inner join...)등을 완벽하게 쿼리문으로 작성할 수 있을때 orm으로 넘어가도 헷갈리지않음. 일단 하나를 완벽하게 한 후에 해도 늦지 않다
