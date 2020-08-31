@@ -5,26 +5,7 @@ IDE : vscode (ubuntu와 ftp 연결) <br>
 <a href='https://user-images.githubusercontent.com/53362054/91158067-1914d280-e701-11ea-9b04-eb3f725ea048.png'>db tables</a> <br>
 <a href='https://gist.github.com/56bcea1e2bf7f3b0ffe24ca9af6ac7a6.git'>db 스키마 정리</a>
 <br>
-### :crystal_ball: dependencies
-* (node, npm, pm2, express 설치)
-* npm init(package.json 생성)
-* npm install express --save
-* npm install body-parser (third party module, json)
-* npm install -g nodemon
-> 실행) nodemon app.js
-<br>
-"axios": "^0.19.2" <br>
-"body-parser": "^1.19.0" <br>
-"cheerio": "^1.0.0-rc.3" <br>
-"console-stamp": "^0.2.9" <br>
-"crypto": "^1.0.1" <br>
-"express": "^4.17.1" <br>
-"iconv": "^3.0.0" <br>
-"jsonwebtoken": "^8.5.1" <br>
-"mysql2": "^2.1.0" <br>
-"request": "^2.88.2" <br>
-
-<br>
+### :crystal_ball: <a href='https://github.com/ujin2021/internship_project/blob/master/project/package.json'>dependencies</a>
 
 ### :crystal_ball: 구현할 것
 <a href="https://gist.github.com/3af9d78e30050203a4c53a09edf60482.git">endpoint</a> <br>
