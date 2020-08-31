@@ -1,13 +1,13 @@
 ## internship_project
 ubuntu(16.04, aws) + node.js(express.js) + mysql <br>
 IDE : vscode (ubuntu와 ftp 연결) <br>
-<a href='https://github.com/ujin2021/2020_summer_internship'>관련 피드백</a> <br>
-<a href='https://github.com/ujin2021/internship_project/tree/master/models'>db tables</a> <br>
+:crystal_ball: <a href='https://github.com/ujin2021/2020_summer_internship'>관련 피드백</a> <br>
+:crystal_ball: <a href='https://github.com/ujin2021/internship_project/tree/master/models'>db tables</a> <br>
+:crystal_ball: <a href="https://app.gitbook.com/@ujin2021/s/summer-internship/@merged">endpoint</a> <br>
+:crystal_ball: <a href='https://github.com/ujin2021/internship_project/blob/master/project/package.json'>dependencies</a>
 <br>
-### :crystal_ball: <a href='https://github.com/ujin2021/internship_project/blob/master/project/package.json'>dependencies</a>
 
-### :crystal_ball: 구현한 것
-<a href="https://app.gitbook.com/@ujin2021/s/summer-internship/@merged">endpoint</a> <br>
+### :crystal_ball: 기능
 ✅ email 중복체크<br>
 ✅ signup <br>
 ✅ login(jwt 인증 기반) <br>
